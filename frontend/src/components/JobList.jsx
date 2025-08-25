@@ -1,3 +1,4 @@
+// JobList.jsx
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { loadJobs } from "../state/jobs";
@@ -6,20 +7,16 @@ import Pagination from "./Pagination";
 
 export default function JobList() {
   const dispatch = useDispatch();
-  const { jobs, loading, error, filters } = useSelector((state) => state.jobs);
+  const { jobs, filters } = useSelector((state) => state.jobs);
 
   useEffect(() => {
     dispatch(loadJobs(filters));
   }, []);
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error}</p>;
-
   return (
-    <section>
+    <section className="container-fluid">
       <JobFilters />
-
-      <table role="grid">
+      <table role="grid" style={{ fontSize: "0.8em" }}>
         <thead>
           <tr>
             <th>Title</th>
@@ -42,6 +39,7 @@ export default function JobList() {
                   target="_blank"
                   rel="noopener noreferrer"
                   role="button"
+                  className="secondary small"
                 >
                   Apply
                 </a>
@@ -50,7 +48,6 @@ export default function JobList() {
           ))}
         </tbody>
       </table>
-
       <Pagination />
     </section>
   );

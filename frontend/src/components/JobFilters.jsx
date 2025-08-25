@@ -1,3 +1,4 @@
+// JobFilters.jsx
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setFilters, loadJobs } from "../state/jobs";
@@ -18,27 +19,32 @@ export default function JobFilters() {
 
   return (
     <form onSubmit={handleSubmit}>
-      <fieldset role="group">
+      <div className="grid">
         <input
           type="text"
           placeholder="Search jobs..."
           value={q}
           onChange={(e) => setQ(e.target.value)}
+          className="small"
         />
         <input
           type="text"
           placeholder="Location"
           value={location}
           onChange={(e) => setLocation(e.target.value)}
+          className="small"
         />
         <input
           type="text"
           placeholder="Company"
           value={company}
           onChange={(e) => setCompany(e.target.value)}
+          className="small"
         />
-        <button type="submit">Filter</button>
-      </fieldset>
+        <button type="submit" className="small">
+          Filter
+        </button>
+      </div>
     </form>
   );
 }

@@ -1,3 +1,4 @@
+// Pagination.jsx
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setPage, loadJobs } from "../state/jobs";
@@ -22,6 +23,7 @@ export default function Pagination() {
             <button
               onClick={() => handlePage(i + 1)}
               aria-current={filters.page === i + 1 ? "page" : undefined}
+              className="small"
             >
               {i + 1}
             </button>
