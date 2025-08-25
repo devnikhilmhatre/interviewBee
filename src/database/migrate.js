@@ -1,18 +1,14 @@
 // initSelectorsDb.js
 const sqlite3 = require("sqlite3").verbose();
 const fs = require("fs");
-const DB_PATH = "./jobs.db";
+const path = require("path");
+const DB_PATH = path.join(__dirname, "./../../jobs.db");
 
-if (fs.existsSync(DB_PATH)) {
-  fs.unlinkSync(DB_PATH);
-  console.log("Existing database deleted.");
-}
+const { log } = require("./../utils");
 
-const db = new sqlite3.Database(DB_PATH);
-
-// Create table if not exists
-db.serialize(() => {
-  db.run(`
+// Define schema
+const schema = {
+  jobs: `
     CREATE TABLE IF NOT EXISTS jobs (
       id TEXT PRIMARY KEY,
       title TEXT NOT NULL,
@@ -23,9 +19,8 @@ db.serialize(() => {
       source TEXT,
       posted_at TEXT
     )
-  `);
-
-  db.run(`
+  `,
+  site_selectors: `
     CREATE TABLE IF NOT EXISTS site_selectors (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       hostname TEXT UNIQUE NOT NULL,
@@ -35,64 +30,74 @@ db.serialize(() => {
       tags_selector TEXT,
       apply_selector TEXT NOT NULL,
       job_link_selector TEXT NOT NULL,
+      job_row_selector TEXT NOT NULL,
       post_date_selector TEXT,
       post_date_attribute TEXT,
       next_page_selector TEXT
     )
-  `);
+  `,
+};
 
-  // Insert example entries
-  const stmt = db.prepare(`
-    INSERT OR IGNORE INTO site_selectors 
-    (hostname, title_selector, company_selector, location_selector, tags_selector, apply_selector, job_link_selector, post_date_selector, post_date_attribute, next_page_selector) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `);
+const sites = [
+  {
+    hostname: "remoteok.com",
+    title_selector: "a.preventLink > h2",
+    company_selector: "h3",
+    location_selector: "div.location",
+    tags_selector: "div.tags > a",
+    apply_selector: "a.preventLink",
+    job_link_selector: "tr.job > td.position > a",
+    job_row_selector: "tr.job",
+    post_date_selector: "time",
+    post_date_attribute: "datetime",
+    next_page_selector: "a.next",
+  },
+];
 
-  // 1️⃣ RemoteOK
-  stmt.run(
-    "remoteok.com",
-    "a.preventLink > h2", // Job title
-    "h3", // Company
-    "div.location", // Location
-    "div.tags > a", // Tags
-    "a.preventLink", // Apply button
-    "tr.job > td.position > a", // Job link in table row
-    "time", // post date selector
-    "datetime", // post date attribute
-    "a.next" // Next page link
-  );
+function initDb() {
+  if (fs.existsSync(DB_PATH)) {
+    fs.unlinkSync(DB_PATH);
+    log.warn("Existing database deleted.");
+  }
 
-  // 2️⃣ Jobspresso
-  stmt.run(
-    "jobspresso.co",
-    ".listing-item__title", // Job title
-    ".listing-item__company", // Company
-    ".listing-item__location", // Location
-    ".listing-item__tags > span", // Tags
-    ".listing-item__link", // Apply button
-    ".listing-item > a", // Job link
-    "time", // post date selector
-    "datetime", // post date attribute
-    ".pagination-next a" // Next page
-  );
+  const db = new sqlite3.Database(DB_PATH);
 
-  // 3️⃣ StackOverflow Jobs Archive (static HTML example)
-  stmt.run(
-    "stackoverflow.com",
-    ".fs-body3", // Job title
-    ".fc-black-700", // Company
-    ".fc-black-500", // Location
-    ".ps-relative > span", // Tags
-    ".s-link", // Apply button
-    ".js-result-link", // Job link
-    "time", // post date selector
-    "datetime", // post date attribute
-    ".s-pagination--item.js-pagination-item-next a" // Next page
-  );
+  db.serialize(() => {
+    // Create tables
+    db.run(schema.jobs);
+    db.run(schema.site_selectors);
 
-  stmt.finalize();
+    // Insert site selectors
+    const stmt = db.prepare(`
+      INSERT OR IGNORE INTO site_selectors 
+      (hostname, title_selector, company_selector, location_selector, tags_selector, apply_selector, job_link_selector, job_row_selector, post_date_selector, post_date_attribute, next_page_selector) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
 
-  console.log("Database initialized and example selectors added.");
-});
+    sites.forEach((site) => {
+      stmt.run(
+        site.hostname,
+        site.title_selector,
+        site.company_selector,
+        site.location_selector,
+        site.tags_selector,
+        site.apply_selector,
+        site.job_link_selector,
+        site.job_row_selector,
+        site.post_date_selector,
+        site.post_date_attribute,
+        site.next_page_selector
+      );
+      log.info(`Extractor details for \`${site.hostname}\` added`);
+    });
 
-db.close();
+    stmt.finalize();
+  });
+
+  db.close();
+  log.info("Database re-initialized successfully.");
+}
+
+if (require.main === module) {
+  initDb();
+}
