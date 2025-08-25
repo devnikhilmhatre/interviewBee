@@ -141,8 +141,8 @@ dist
 # SvelteKit build / generate output
 .svelte-kit
 
-jobs.db
-test_jobs.db
+backend/jobs.db
+backend/test_jobs.db
 folder_tree.txt
 
 # End of https://www.toptal.com/developers/gitignore/api/node
