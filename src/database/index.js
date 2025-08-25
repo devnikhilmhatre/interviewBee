@@ -1,4 +1,4 @@
-const { Sequelize, DataTypes } = require("sequelize");
+const { Sequelize } = require("sequelize");
 const path = require("path");
 
 const DB_PATH = path.join(__dirname, "../../jobs.db");
