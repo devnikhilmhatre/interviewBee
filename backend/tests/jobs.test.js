@@ -27,7 +27,7 @@ beforeAll(async () => {
   SiteModel.init(SiteModel.getAttributes(), {
     sequelize,
     modelName: "Site",
-    tableName: "site_selectors",
+    tableName: "sites",
     timestamps: false,
   });
 

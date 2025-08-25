@@ -12,6 +12,7 @@ function getSites() {
       post_date_selector: "time",
       post_date_attribute: "datetime",
       next_page_selector: "a.next",
+      infinite_scroll: true,
     },
   ];
 }

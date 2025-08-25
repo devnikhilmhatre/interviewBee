@@ -10,29 +10,32 @@ async function crawl(site) {
   const page = await browser.newPage();
   let nextPageUrl = `https://${hostname}`;
 
+  let previousJobCount = 0;
+
   try {
     while (nextPageUrl) {
       await downloadContent(page, nextPageUrl);
       let jobsLinks = await extractJobLinks(page, site);
-      if (jobsLinks.length == 0) {
-        console.warn("No jobLinks found.");
-        return;
-      }
-      await fetchJobs(browser, jobsLinks, site);
-      nextPageUrl = await nextPage(page, site);
+      // if (jobsLinks.length == 0) {
+      //   console.warn("No jobLinks found.");
+      //   return;
+      // }
+      // await fetchJobs(browser, jobsLinks, site);
+      previousJobCount += jobsLinks.length;
+      nextPageUrl = await nextPage(page, site, previousJobCount);
     }
   } catch (error) {
     log.error(`Failed to crawl: ${nextPageUrl}`, error.message);
   } finally {
     browser.close();
   }
+
+  log.info(previousJobCount);
 }
 
 async function downloadContent(page, url) {
   log.step(`Downloading content from ${url}`);
-  await withRetries(() =>
-    page.goto(url, { waitUntil: "domcontentloaded", timeout: 60000 })
-  );
+  await withRetries(() => page.goto(url, { waitUntil: "networkidle" }));
 }
 
 async function extractJobLinks(page, site) {
@@ -144,19 +147,40 @@ async function extractJob(page, site) {
   };
 }
 
-async function nextPage(page, site) {
-  log.step("Extracting Next page URL");
-  const { next_page_selector } = site;
+async function nextPage(page, site, previousJobCount = 0) {
+  const { next_page_selector, infinite_scroll } = site;
 
-  const url = next_page_selector
-    ? await page.evaluate((sel) => {
-        const nextLink = document.querySelector(sel);
-        return nextLink ? nextLink.href : null;
-      }, next_page_selector)
-    : null;
+  if (infinite_scroll) {
+    // Scroll a little to load next batch of jobs
+    log.step("Scrolling for next batch of infinite scroll jobs...");
+    await page.evaluate("window.scrollBy(0, window.innerHeight)");
+    await page.waitForTimeout(1500 + Math.random() * 500);
 
-  log.info("Next page URL:", url || "No more pages");
-  return url;
+    // Count jobs after scroll
+    const currentJobCount = await page.evaluate(
+      (sel) => document.querySelectorAll(sel).length,
+      site.job_link_selector
+    );
+
+    if (currentJobCount > previousJobCount) {
+      log.info(`Loaded ${currentJobCount - previousJobCount} new jobs`);
+      return page.url(); // return current URL to continue crawling
+    } else {
+      log.info("No more jobs to load via scrolling");
+      return null; // stop crawling
+    }
+  } else if (next_page_selector) {
+    // Numbered pagination
+    const url = await page.evaluate((sel) => {
+      const nextLink = document.querySelector(sel);
+      return nextLink ? nextLink.href : null;
+    }, next_page_selector);
+
+    log.info("Next page URL:", url || "No more pages");
+    return url;
+  } else {
+    return null;
+  }
 }
 
 async function main() {

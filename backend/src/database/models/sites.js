@@ -16,6 +16,7 @@ const SiteModel = sequelize.define(
     post_date_selector: DataTypes.STRING,
     post_date_attribute: DataTypes.STRING,
     next_page_selector: DataTypes.STRING,
+    infinite_scroll: DataTypes.BOOLEAN,
   },
   { tableName: "sites", timestamps: false }
 );
