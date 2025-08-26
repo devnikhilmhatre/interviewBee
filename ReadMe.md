@@ -116,5 +116,6 @@ http://localhost:5173/
 - Local run only; no hosting required.
 - Infinite scroll is batched to prevent memory overflow.
 - The crawler skips URLs already present in the database.
+- **UpdateJob is commented for demo purpose.**
 
 ---
