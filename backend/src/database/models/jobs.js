@@ -9,7 +9,7 @@ const JobModel = sequelize.define(
     company: { type: DataTypes.STRING, allowNull: false },
     location: DataTypes.STRING,
     tags: DataTypes.STRING,
-    url: { type: DataTypes.STRING, allowNull: false, unique: true },
+    url: { type: DataTypes.STRING, allowNull: false },
     source: DataTypes.STRING,
     posted_at: DataTypes.STRING,
   },
@@ -17,7 +17,10 @@ const JobModel = sequelize.define(
     tableName: "jobs",
     timestamps: true,
     indexes: [
-      { unique: true, fields: ["url"] },
+      {
+        unique: true,
+        fields: ["url"],
+      },
       { fields: ["company"] },
       { fields: ["location"] },
       { fields: ["posted_at"] },

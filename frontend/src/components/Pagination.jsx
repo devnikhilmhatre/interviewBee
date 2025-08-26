@@ -16,14 +16,29 @@ export default function Pagination() {
   if (totalPages <= 1) return null;
 
   return (
-    <nav aria-label="Job pages">
-      <ul>
+    <nav
+      aria-label="Job pages"
+      style={{ textAlign: "center", marginTop: "0.5rem" }}
+    >
+      <ul
+        className="pagination"
+        style={{
+          display: "inline-flex",
+          gap: "0.25rem",
+          listStyle: "none",
+          padding: 0,
+        }}
+      >
         {Array.from({ length: totalPages }, (_, i) => (
           <li key={i + 1}>
             <button
               onClick={() => handlePage(i + 1)}
               aria-current={filters.page === i + 1 ? "page" : undefined}
-              className="small"
+              className={
+                filters.page === i + 1
+                  ? "contrast compact-btn"
+                  : "secondary compact-btn"
+              }
             >
               {i + 1}
             </button>

@@ -1,5 +1,6 @@
 const { JobModel } = require("./models/jobs");
 const { SiteModel } = require("./models/sites");
+const { log } = require("./../log");
 
 // Fetch all sites from SQLite
 async function getAllSites() {
@@ -55,31 +56,52 @@ async function saveJobsBulk(jobs) {
   if (!jobs?.length) return;
 
   try {
-    // Prepare data for bulkCreate
-    const bulkData = jobs.map((job) => ({
-      id: job.id,
-      title: job.title,
-      company: job.company,
-      location: job.location || "",
-      tags: JSON.stringify(job.tags || []),
-      url: job.url,
-      source: job.source,
-      posted_at: job.posted_at,
-    }));
+    // Extract URLs
+    const urls = jobs.map((job) => job.url);
 
-    await JobModel.bulkCreate(bulkData, {
-      updateOnDuplicate: [
-        "title",
-        "company",
-        "location",
-        "tags",
-        "source",
-        "posted_at",
-      ],
-      conflictFields: ["url"],
+    // Fetch existing jobs from DB
+    const existingJobs = await JobModel.findAll({
+      where: { url: urls },
+      attributes: ["url"],
+      raw: true,
     });
 
-    return bulkData.length;
+    const existingUrls = new Set(existingJobs.map((j) => j.url));
+
+    // Separate jobs into new and to-update
+    const toInsert = [];
+    const toUpdate = [];
+
+    for (const job of jobs) {
+      const jobData = {
+        title: job.title,
+        company: job.company,
+        location: job.location || "",
+        tags: JSON.stringify(job.tags || []),
+        url: job.url,
+        source: job.source,
+        posted_at: job.posted_at,
+      };
+
+      if (existingUrls.has(job.url)) {
+        toUpdate.push(jobData);
+      } else {
+        toInsert.push(jobData);
+      }
+    }
+
+    // Bulk insert new jobs
+    if (toInsert.length) {
+      await JobModel.bulkCreate(toInsert);
+    }
+
+    // Update existing jobs one by one (SQLite doesn't support bulk update easily)
+    for (const job of toUpdate) {
+      log.warn(`Skipping update for demo purpose. ${job.url}`);
+      // await JobModel.update(job, { where: { url: job.url } });
+    }
+
+    return jobs.length;
   } catch (error) {
     throw new Error(`Failed to bulk save jobs: ${error.message}`);
   }

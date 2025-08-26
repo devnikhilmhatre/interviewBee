@@ -16,7 +16,7 @@ export default function JobList() {
   return (
     <section className="container-fluid">
       <JobFilters />
-      <table role="grid" style={{ fontSize: "0.8em" }}>
+      <table role="grid" className="striped dense-table">
         <thead>
           <tr>
             <th>Title</th>
@@ -38,8 +38,7 @@ export default function JobList() {
                   href={job.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  role="button"
-                  className="secondary small"
+                  className="dense-btn secondary"
                 >
                   Apply
                 </a>
@@ -48,6 +47,7 @@ export default function JobList() {
           ))}
         </tbody>
       </table>
+
       <Pagination />
     </section>
   );

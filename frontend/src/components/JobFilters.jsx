@@ -18,30 +18,36 @@ export default function JobFilters() {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div className="grid">
+    <form onSubmit={handleSubmit} className="job-filters dense">
+      <div
+        className="grid"
+        style={{
+          gridTemplateColumns: "repeat(auto-fit, minmax(100px, 1fr))",
+          gap: "0.25rem",
+        }}
+      >
         <input
           type="text"
-          placeholder="Search jobs..."
+          placeholder="Search..."
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          className="small"
+          className="dense-input"
         />
         <input
           type="text"
           placeholder="Location"
           value={location}
           onChange={(e) => setLocation(e.target.value)}
-          className="small"
+          className="dense-input"
         />
         <input
           type="text"
           placeholder="Company"
           value={company}
           onChange={(e) => setCompany(e.target.value)}
-          className="small"
+          className="dense-input"
         />
-        <button type="submit" className="small">
+        <button type="submit" className="dense-btn secondary">
           Filter
         </button>
       </div>

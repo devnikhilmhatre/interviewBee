@@ -4,6 +4,8 @@ const { getSites } = require("./data/sites");
 const { sequelize } = require("./index");
 const { log } = require("../log");
 
+// PRAGMA index_list(jobs);
+
 async function initDb() {
   try {
     await sequelize.authenticate();

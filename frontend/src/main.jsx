@@ -5,6 +5,7 @@ import App from "./App.jsx";
 import { store } from "./state";
 
 import "@picocss/pico";
+import "./style.css";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
