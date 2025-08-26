@@ -1,27 +1,39 @@
 const { chromium } = require("playwright");
 const { withRetries, sleep } = require("./utils");
-const { getAllSites, saveJob } = require("./../database//jobs");
+const { getAllSites, saveJob, filterJobLinks } = require("./../database//jobs");
 const inquirer = require("inquirer").default;
 const { log } = require("./../log");
 
-async function crawl(site) {
+async function crawl(site, maxJobs) {
   const { hostname } = site;
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage();
   let nextPageUrl = `https://${hostname}`;
 
   let previousJobCount = 0;
+  let firstLoad = true;
 
   try {
     while (nextPageUrl) {
-      await downloadContent(page, nextPageUrl);
+      if (firstLoad || !site.infinite_scroll) {
+        await downloadContent(page, nextPageUrl);
+        firstLoad = false;
+      }
+
       let jobsLinks = await extractJobLinks(page, site);
-      // if (jobsLinks.length == 0) {
-      //   console.warn("No jobLinks found.");
-      //   return;
-      // }
-      // await fetchJobs(browser, jobsLinks, site);
+      if (jobsLinks.length == 0) {
+        console.warn("No jobLinks found.");
+        break;
+      }
+      await fetchJobs(browser, jobsLinks, site);
       previousJobCount += jobsLinks.length;
+
+      if (previousJobCount > maxJobs) {
+        console.warn(
+          "Limiting job fetch for current state else it would a lot of time to fetch them all."
+        );
+        break;
+      }
       nextPageUrl = await nextPage(page, site, previousJobCount);
     }
   } catch (error) {
@@ -30,7 +42,7 @@ async function crawl(site) {
     browser.close();
   }
 
-  log.info(previousJobCount);
+  log.info(`Total Number of jobs fetched: ${previousJobCount}`);
 }
 
 async function downloadContent(page, url) {
@@ -77,8 +89,12 @@ async function extractJobLinks(page, site) {
 }
 
 async function fetchJobs(browser, jobsLinks, site) {
-  log.step(`Fetching details for ${jobsLinks.length} jobs`);
-  for (let jobLink of jobsLinks) {
+  const filteredJobsLinks = await filterJobLinks(jobsLinks);
+  log.step(`Fetching details for ${filteredJobsLinks.length} jobs`);
+  let count = 0;
+  for (let jobLink of filteredJobsLinks) {
+    count += 1;
+    log.step(`${count}: Fetching ${jobLink.url}`);
     await sleep(1000 + Math.random() * 1000);
 
     try {
@@ -148,18 +164,22 @@ async function extractJob(page, site) {
 }
 
 async function nextPage(page, site, previousJobCount = 0) {
-  const { next_page_selector, infinite_scroll } = site;
+  const { next_page_selector, infinite_scroll, job_link_selector } = site;
 
   if (infinite_scroll) {
     // Scroll a little to load next batch of jobs
     log.step("Scrolling for next batch of infinite scroll jobs...");
-    await page.evaluate("window.scrollBy(0, window.innerHeight)");
-    await page.waitForTimeout(1500 + Math.random() * 500);
 
+    let maxScroll = 3;
+
+    for (let i = 0; i <= maxScroll; i++) {
+      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+      await page.waitForTimeout(1500 + Math.random() * 500);
+    }
     // Count jobs after scroll
     const currentJobCount = await page.evaluate(
       (sel) => document.querySelectorAll(sel).length,
-      site.job_link_selector
+      job_link_selector
     );
 
     if (currentJobCount > previousJobCount) {
@@ -201,7 +221,8 @@ async function main() {
     },
   ]);
 
-  await crawl(answers.site);
+  let maxJobs = 100;
+  await crawl(answers.site, maxJobs);
 }
 
 if (require.main === module) {

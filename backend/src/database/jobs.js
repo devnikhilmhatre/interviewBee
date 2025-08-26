@@ -11,6 +11,25 @@ async function getAllSites() {
   }
 }
 
+async function filterJobLinks(jobsLinks) {
+  if (!jobsLinks || jobsLinks.length === 0) return [];
+
+  const urls = jobsLinks.map((j) => j.url);
+
+  // Fetch existing jobs from DB
+  const existingJobs = await JobModel.findAll({
+    where: { url: urls },
+    attributes: ["url"],
+  });
+
+  const existingUrls = new Set(existingJobs.map((job) => job.url));
+
+  // Filter out already existing jobs
+  const filtered = jobsLinks.filter((j) => !existingUrls.has(j.url));
+
+  return filtered;
+}
+
 async function saveJob(job) {
   try {
     const [savedJob] = await JobModel.upsert(
@@ -24,7 +43,7 @@ async function saveJob(job) {
         source: job.source,
         posted_at: job.posted_at,
       },
-      { returning: true }
+      { returning: true, conflictFields: ["url"] }
     );
     return savedJob;
   } catch (error) {
@@ -35,4 +54,5 @@ async function saveJob(job) {
 module.exports = {
   getAllSites,
   saveJob,
+  filterJobLinks,
 };

@@ -9,11 +9,20 @@ const JobModel = sequelize.define(
     company: { type: DataTypes.STRING, allowNull: false },
     location: DataTypes.STRING,
     tags: DataTypes.STRING,
-    url: { type: DataTypes.STRING, allowNull: false },
+    url: { type: DataTypes.STRING, allowNull: false, unique: true },
     source: DataTypes.STRING,
     posted_at: DataTypes.STRING,
   },
-  { tableName: "jobs", timestamps: false }
+  {
+    tableName: "jobs",
+    timestamps: true,
+    indexes: [
+      { unique: true, fields: ["url"] },
+      { fields: ["company"] },
+      { fields: ["location"] },
+      { fields: ["posted_at"] },
+    ],
+  }
 );
 
 module.exports = { JobModel };
