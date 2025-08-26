@@ -1,0 +1,25 @@
+/* Inputs and buttons */
+.dense-input,
+.dense-btn {
+  font-size: 0.7rem;
+  padding: 0.2rem 0.4rem;
+  min-height: auto;
+}
+
+/* Table */
+.dense-table {
+  font-size: 0.7rem;
+  margin-top: 0.25rem;
+  border-spacing: 0.25rem;
+}
+
+/* Filters spacing */
+.job-filters.dense {
+  margin-bottom: 0.25rem;
+}
+
+/* Pagination buttons */
+.dense-btn {
+  min-width: 30px;
+  padding: 0.2rem 0.3rem;
+}
