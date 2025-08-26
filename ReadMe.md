@@ -61,7 +61,8 @@ node src/crawler/
 1. **Start the server**:
 
 ```bash
-node backend/server/
+cd backend
+node src/server
 ```
 
 2. **API endpoint**:
