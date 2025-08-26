@@ -88,21 +88,26 @@ http://localhost:3000/jobs?q=engineer&location=Remote&page=1&limit=10
 
 ## Running the Frontend (React/Next.js)
 
-1. **Start frontend**:
+1. **Install dependencies**:
 
 ```bash
 cd frontend
 npm install
+```
+
+2. **Start frontend**:
+
+```bash
 npm run dev
 ```
 
-2. Open your browser at:
+3. Open your browser at:
 
 ```
 http://localhost:5173/
 ```
 
-3. Features:
+4. Features:
 
 - Job list with **Apply** link
 - **Keyword search**
