@@ -53,6 +53,9 @@ node src/crawler/
 3. **Notes**:
 
 - Infinite scroll sites are handled safely in batches.
+- If you want to crawl any other website, add the site details (selectors, pagination/scroll info, etc.) in `backend/src/database/data/sites.js` and then run the migration
+  `script (node backend/src/database/migrate.js)`.
+  When you start the crawler, it will prompt you to select from the newly added website(s).
 
 ---
 

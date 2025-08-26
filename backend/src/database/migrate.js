@@ -12,7 +12,7 @@ async function initDb() {
     log.info("Connection established successfully.");
 
     // Sync tables
-    await sequelize.sync({ force: true }); // Drops and recreates tables
+    await sequelize.sync({}); // Drops and recreates tables
     log.info("Tables created/recreated successfully.");
 
     // Insert site selectors
