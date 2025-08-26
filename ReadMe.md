@@ -25,13 +25,14 @@ Job Hunter MVP is a simple web application that:
 1. **Install dependencies**:
 
 ```bash
+cd backend
 npm install
 ```
 
 2. **Run migrations**:
 
 ```bash
-node backend/src/database/migrate.js
+node src/database/migrate.js
 ```
 
 The `migrate.js` script **re-initializes** the database by dropping and recreating all tables, then pre-populates the sites table with the configured job site selectors for the crawler to use.
@@ -43,7 +44,7 @@ The `migrate.js` script **re-initializes** the database by dropping and recreati
 1. **Start the crawler**:
 
 ```bash
-node backend/crawler/index.js
+node crawler/index.js
 ```
 
 2. **Select a site** from the prompt.
@@ -91,6 +92,7 @@ http://localhost:3000/jobs?q=engineer&location=Remote&page=1&limit=10
 
 ```bash
 cd frontend
+npm install
 npm run dev
 ```
 
