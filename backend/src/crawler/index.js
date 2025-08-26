@@ -5,7 +5,7 @@ const inquirer = require("inquirer").default;
 const { log } = require("./../log");
 
 const { extractJobLinks } = require("./extractLinks");
-const { fetchJobs } = require("./fetchJobs");
+const { fetchJobs, fetchJobsParallel } = require("./fetchJobs");
 const { nextPage } = require("./nextPage");
 const { downloadContent } = require("./downloadContent");
 
@@ -30,7 +30,7 @@ async function crawl(site, maxJobs) {
         console.warn("No jobLinks found.");
         break;
       }
-      await fetchJobs(browser, jobsLinks, site);
+      await fetchJobsParallel(browser, jobsLinks, site);
       previousJobCount += jobsLinks.length;
 
       if (previousJobCount > maxJobs) {

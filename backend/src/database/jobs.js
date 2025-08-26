@@ -51,8 +51,43 @@ async function saveJob(job) {
   }
 }
 
+async function saveJobsBulk(jobs) {
+  if (!jobs?.length) return;
+
+  try {
+    // Prepare data for bulkCreate
+    const bulkData = jobs.map((job) => ({
+      id: job.id,
+      title: job.title,
+      company: job.company,
+      location: job.location || "",
+      tags: JSON.stringify(job.tags || []),
+      url: job.url,
+      source: job.source,
+      posted_at: job.posted_at,
+    }));
+
+    await JobModel.bulkCreate(bulkData, {
+      updateOnDuplicate: [
+        "title",
+        "company",
+        "location",
+        "tags",
+        "source",
+        "posted_at",
+      ],
+      conflictFields: ["url"],
+    });
+
+    return bulkData.length;
+  } catch (error) {
+    throw new Error(`Failed to bulk save jobs: ${error.message}`);
+  }
+}
+
 module.exports = {
   getAllSites,
   saveJob,
+  saveJobsBulk,
   filterJobLinks,
 };

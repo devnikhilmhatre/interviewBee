@@ -116,6 +116,5 @@ http://localhost:5173/
 - Local run only; no hosting required.
 - Infinite scroll is batched to prevent memory overflow.
 - The crawler skips URLs already present in the database.
-<!-- - Job details fetching is currently sequential for safety; parallel fetching via `Promise.all` is possible but not used to avoid potential site restrictions or domain issues. -->
 
 ---
