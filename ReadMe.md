@@ -44,7 +44,7 @@ The `migrate.js` script **re-initializes** the database by dropping and recreati
 1. **Start the crawler**:
 
 ```bash
-node crawler/index.js
+node src/crawler/
 ```
 
 2. **Select a site** from the prompt.
@@ -61,7 +61,7 @@ node crawler/index.js
 1. **Start the server**:
 
 ```bash
-node backend/server/index.js
+node backend/server/
 ```
 
 2. **API endpoint**:
